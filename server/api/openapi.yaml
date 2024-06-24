@@ -1,0 +1,541 @@
+openapi: 3.0.3
+info:
+  title: My Basecamp 1
+  description: The purpose of this document is to outline the software requirements
+    for the "my-basecamp1" project on the Qwasar platform. It serves as a guide for
+    the development and verification of the system.
+  version: 1.0.0
+servers:
+- url: https://example.com/api
+tags:
+- name: User
+  description: Operations about user
+- name: Project
+  description: Access to Projects
+- name: Authentication
+  description: routes that handle user autentication
+paths:
+  /login:
+    post:
+      tags:
+      - Authentication
+      summary: Logs user into the system
+      description: ""
+      operationId: loginUser
+      parameters:
+      - name: username
+        in: query
+        description: The user name for login
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: password
+        in: query
+        description: The password for login in clear text
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              style: simple
+              explode: false
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: date in UTC when token expires
+              style: simple
+              explode: false
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                type: string
+                x-content-type: application/json
+        "400":
+          description: Invalid username/password supplied
+      x-swagger-router-controller: Authentication
+  /logout:
+    post:
+      tags:
+      - Authentication
+      summary: Logs out current logged in user session
+      description: ""
+      operationId: logoutUser
+      parameters: []
+      responses:
+        default:
+          description: successful operation
+      x-swagger-router-controller: Authentication
+  /users/{userId}/uploadImage:
+    post:
+      tags:
+      - User
+      summary: uploads an image
+      description: ""
+      operationId: uploadFile
+      parameters:
+      - name: userId
+        in: path
+        description: ID of user to update
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      - name: additionalMetadata
+        in: query
+        description: Additional Metadata
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserImage'
+      x-swagger-router-controller: User
+  /users:
+    get:
+      tags:
+      - User
+      summary: get all users
+      description: gets an array of all users in the application
+      operationId: usersGET
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserArray'
+      x-swagger-router-controller: User
+    post:
+      tags:
+      - User
+      summary: Create user
+      description: This can only be done by the logged in user.
+      operationId: createUser
+      requestBody:
+        description: Created user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      x-swagger-router-controller: User
+  /users/{userId}:
+    get:
+      tags:
+      - User
+      summary: Get user by user name
+      description: ""
+      operationId: getUserByName
+      parameters:
+      - name: userId
+        in: path
+        description: 'The name that needs to be fetched. Use user1 for testing. '
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: Invalid username supplied
+        "404":
+          description: User not found
+      x-swagger-router-controller: User
+    put:
+      tags:
+      - User
+      summary: Update user
+      description: This can only be done by the logged in user.
+      operationId: updateUser
+      parameters:
+      - name: userId
+        in: path
+        description: id that need to be updated
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Update an existent user in the store
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      x-swagger-router-controller: User
+    delete:
+      tags:
+      - User
+      summary: Delete user
+      description: This can only be done by the logged in user.
+      operationId: deleteUser
+      parameters:
+      - name: userId
+        in: path
+        description: The name that needs to be deleted
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Invalid username supplied
+        "404":
+          description: User not found
+      x-swagger-router-controller: User
+  /projects/{Id}/attachments:
+    post:
+      tags:
+      - Project
+      summary: uploads an image
+      description: ""
+      operationId: upload File attachments for a project
+      parameters:
+      - name: Id
+        in: path
+        description: The file to upload
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              $ref: '#/components/schemas/Id_attachments_body'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+      x-swagger-router-controller: Project
+  /projects:
+    get:
+      tags:
+      - Project
+      summary: get all projects for a particular user
+      description: gets an array of all projects in the application create by the
+        loggedin user
+      operationId: projectsGET
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectArray'
+      x-swagger-router-controller: Project
+    post:
+      tags:
+      - Project
+      summary: craete a new project
+      description: This can only be done by the logged in user.
+      operationId: creats a new project for a user
+      requestBody:
+        description: creates a project object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+      x-swagger-router-controller: Project
+  /projects/{Id}:
+    get:
+      tags:
+      - Project
+      summary: Get projects by its id
+      description: ""
+      operationId: getProjectById
+      parameters:
+      - name: Id
+        in: path
+        description: id of the project
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        "400":
+          description: Invalid username supplied
+        "404":
+          description: User not found
+      x-swagger-router-controller: Project
+    put:
+      tags:
+      - Project
+      summary: Update project
+      description: This can only be done by the logged in user.
+      operationId: updateproject
+      parameters:
+      - name: Id
+        in: path
+        description: id of project that needs to be updated
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Update an existent uproject in the stack
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+      x-swagger-router-controller: Project
+    delete:
+      tags:
+      - Project
+      summary: Delete project
+      description: This can only be done by the logged in user.
+      operationId: deleteProject
+      parameters:
+      - name: Id
+        in: path
+        description: The id of the project that needs to be deleted
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Invalid projectId supplied
+        "404":
+          description: Project not found
+      x-swagger-router-controller: Project
+components:
+  schemas:
+    Project:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        userId:
+          type: integer
+          format: int64
+          example: 198772
+        name:
+          type: string
+          format: text
+          example: project1
+        description:
+          type: string
+          format: text
+          example: build project
+        createDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          description: Project Status
+          example: approved
+          enum:
+          - approved
+          - delivered
+        complete:
+          type: boolean
+      example:
+        name: project1
+        description: build project
+        id: 10
+        complete: true
+        userId: 198772
+        createDate: 2000-01-23T04:56:07.000+00:00
+        status: approved
+    ProjectRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          format: text
+          example: project1
+        description:
+          type: string
+          format: text
+          example: build project
+        status:
+          type: string
+          description: Project Status
+          example: approved
+          enum:
+          - approved
+          - delivered
+        complete:
+          type: boolean
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        username:
+          type: string
+          example: theUser
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: James
+        email:
+          type: string
+          example: john@email.com
+        userStatus:
+          type: integer
+          description: User Status
+          format: int32
+          example: 1
+        imageUrl:
+          type: string
+      example:
+        firstName: John
+        lastName: James
+        userStatus: 1
+        imageUrl: imageUrl
+        id: 10
+        email: john@email.com
+        username: theUser
+    UserRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        username:
+          type: string
+          example: theUser
+        firstName:
+          type: string
+          example: John
+        password:
+          type: string
+          example: "12345"
+        lastName:
+          type: string
+          example: James
+        email:
+          type: string
+          example: john@email.com
+        userStatus:
+          type: integer
+          description: User Status
+          format: int32
+          example: 1
+        imageUrl:
+          type: string
+    UserArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/User'
+    ProjectArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/Project'
+    UserImage:
+      type: object
+      properties:
+        imageUrl:
+          type: string
+      example:
+        imageUrl: imageUrl
+    Id_attachments_body:
+      type: object
+      properties:
+        file:
+          type: string
+          description: The file to uploady
+          format: binary
+    inline_response_200:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Success message
+      example:
+        message: message
+  securitySchemes:
+    userstore_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://userstore3.swagger.io/oauth/authorize
+          scopes:
+            write:users: modify users in your account
+            read:users: read your users
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header

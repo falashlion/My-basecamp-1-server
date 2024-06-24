@@ -1,0 +1,6 @@
+{
+    "env": {
+        "MONGO_ATLAS_URL": "mongodb+srv://felix:felix007@basecamp1cl.fnra6eq.mongodb.net/?retryWrites=true&w=majority&appName=Basecamp1cl",
+        "JWT_SECRET": "secret"
+    }
+}
