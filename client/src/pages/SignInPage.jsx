@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Link } from 'react-router-dom';
 import LogoLayout from '../layouts/LogoLayout';
-import { useEffect } from 'react';
 
 const SignInPage = ({ onSignIn }) => {
 
@@ -19,36 +18,39 @@ const SignInPage = ({ onSignIn }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Implement sign-in logic here, e.g., call an API to authenticate the user
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (res.ok) {
-      const data = await res.json();
-      onSignIn(data.data.user.token);
-      toast.success('Login successful!');
-      return navigate('/'); // Redirect to home page after successful sign-in
-    } else {
-      // Handle sign-in error
-      toast.error('Sign-in failed. Please check your email and password.');
-      console.error('Sign-in failed');
+      if (res.ok) {
+        const data = await res.json();
+        onSignIn(data.data.user.token);
+        toast.success('Login successful!');
+        navigate('/home'); // Redirect to home page after successful sign-in
+      } else {
+        toast.error('Sign-in failed. Please check your email and password.');
+        console.error('Sign-in failed');
+      }
+    } catch (error) {
+      toast.error('An error occurred. Please try again later.');
+      console.error('An error occurred:', error);
     }
   };
   
   return (
     <>   
-      < ToastContainer />
+      <ToastContainer />
       <Helmet>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Loopple/loopple-public-assets@main/motion-tailwind/motion-tailwind.css" />
       </Helmet>
       <body className="bg-white py-5"> 
         <div className="container flex flex-col mx-auto bg-white bg-opacity-60 backdrop-blur-sm rounded-lg pt-12 my-5 px-5">
-        < LogoLayout />
+          <LogoLayout />
           <div className="flex justify-center w-full h-full my-auto xl:gap-14 lg:justify-normal md:gap-5">
             <div className="flex items-center justify-center w-full lg:p-12">
               <div className="flex items-center xl:p-10 border border-grey-300 bg-grey-100 rounded-3xl p-5 lg:p-8 xl:p-10">

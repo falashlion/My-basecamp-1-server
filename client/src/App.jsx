@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider, Navigate, useLocation } from 'react-router-dom';
+import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider, Navigate } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import ProjectsPage from './pages/ProjectsPage';
 import MainLayout from './layouts/Mainlayout';
@@ -13,7 +13,7 @@ import { toast } from 'react-toastify';
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [initialPath, setInitialPath] = useState('/');
+  const [initialPath, setInitialPath] = useState('/signin');
 
   const handleSignIn = (token) => {
     localStorage.setItem('token', token);
@@ -100,31 +100,36 @@ const App = () => {
       setInitialPath(savedPath);
       sessionStorage.removeItem('savedPath');
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const handleNavigation = (path) => {
     sessionStorage.setItem('savedPath', path);
   };
 
+  const ProtectedRoute = ({ element }) => {
+    return isAuthenticated ? element : <Navigate to="/signin" replace />;
+  };
+
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
-        <Route path="/" element={<MainLayout isAuthenticated={isAuthenticated} handleLogout={handleLogout} />}>
-          <Route index element={ isAuthenticated ? <HomePage /> : <SignInPage />} />
-          <Route path="/projects" element={ <ProjectsPage /> } />
-          <Route path="/add-project" element={ <AddProjectPage addProjectSubmit={addProject} /> } />
-          <Route path="/edit-projects/:id" element={ <EditProjectPage updateProjectSubmit={updateProject} /> } loader={projectLoader} />
-          <Route path="/projects/:id" element={ <ProjectPage deleteProject={deleteProject} /> } loader={projectLoader} />
-        </Route>
+        <Route path="/" element={<Navigate to="/signin" replace />} />
         <Route path="/signin" element={<SignInPage onSignIn={handleSignIn} />} />
         <Route path="/signup" element={<SignUpPage onSignUp={handleSignUp} />} />
+        <Route path="/" element={<MainLayout isAuthenticated={isAuthenticated} handleLogout={handleLogout} />}>
+          <Route path="/home" element={<ProtectedRoute element={<HomePage />} />} />
+          <Route path="/projects" element={<ProtectedRoute element={<ProjectsPage />} />} />
+          <Route path="/add-project" element={<ProtectedRoute element={<AddProjectPage addProjectSubmit={addProject} />} />} />
+          <Route path="/edit-projects/:id" element={<ProtectedRoute element={<EditProjectPage updateProjectSubmit={updateProject} />} />} loader={projectLoader} />
+          <Route path="/projects/:id" element={<ProtectedRoute element={<ProjectPage deleteProject={deleteProject} />} />} loader={projectLoader} />
+        </Route>
         <Route path="*" element={<NotFoundPage />} />
       </>
     )
   );
 
   useEffect(() => {
-    if (isAuthenticated && initialPath !== '/') {
+    if (isAuthenticated && initialPath !== '/signin') {
       router.navigate(initialPath);
     }
   }, [isAuthenticated, initialPath]);
