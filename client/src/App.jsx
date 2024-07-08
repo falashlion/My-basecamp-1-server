@@ -110,7 +110,7 @@ const App = () => {
     createRoutesFromElements(
       <>
         <Route path="/" element={<MainLayout isAuthenticated={isAuthenticated} handleLogout={handleLogout} />}>
-          <Route index element={ <HomePage /> } />
+          <Route index element={ isAuthenticated ? <HomePage /> : <SignInPage />} />
           <Route path="/projects" element={ <ProjectsPage /> } />
           <Route path="/add-project" element={ <AddProjectPage addProjectSubmit={addProject} /> } />
           <Route path="/edit-projects/:id" element={ <EditProjectPage updateProjectSubmit={updateProject} /> } loader={projectLoader} />
