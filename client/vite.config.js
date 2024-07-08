@@ -8,7 +8,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'https://mybasecampserver1.vercel.app/api',
+        target: env.VITE_API_BASE_URL,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }
