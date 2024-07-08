@@ -18,31 +18,31 @@ exports.login = (req, res, next) => {
                     if(err){
                         responseHandler(res, 500, "An error occurred", { error: err });
                     }
-                    if(result){
-                        console.log(secretKey, result);
-                        const token = jwt.sign({
+                        if(result){
+                            console.log(secretKey, result);
+                            const token = jwt.sign({
+                                email: doc.email,
+                                userId: doc._id
+                            }, secretKey, {
+                                expiresIn: "1h"
+                            });
+                            responseHandler(res, 200, "login successful", { user: {
+                            _id: doc._id,
+                            firstName: doc.firstName,
+                            lastName: doc.lastName,
                             email: doc.email,
-                            userId: doc._id
-                        }, secretKey, {
-                            expiresIn: "1h"
-                        });
-                        responseHandler(res, 200, "login successful", { user: {
-                        _id: doc._id,
-                        first_name: doc.first_name,
-                        last_name: doc.last_name,
-                        email: doc.email,
-                        is_admin: doc.is_admin,
-                        userImage: doc.userImage,
-                        token: token,
-                        request: {
-                            method: 'GET',
-                            url: "http://localhost:5000/api/users/" + doc._id
+                            is_admin: doc.is_admin,
+                            userImage: doc.userImage,
+                            token: token,
+                            request: {
+                                method: ' POST',
+                                url: "http://localhost:5000/api/users/" + doc._id
+                            }
                         }
-                    }
                          });
-                    } else {
-                        responseHandler(res, 401, "login failed", { message: "Invalid email or password" });
-                    }
+                        } else {
+                            responseHandler(res, 401, "login failed", { message: "Invalid email or password" });
+                        }
                 });
             }
         })

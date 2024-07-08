@@ -18,15 +18,18 @@ const File = multer({storage: storage});
 // get all projects
 router.get('/', projectController.getAllProjects);
 // create a new project
+
 router.post('/', checkAuth, projectController.createProject);
 
 // get a specific project
 router.get('/:id', projectController.getProjectById );
 
 // update a specific project
+
 router.patch('/:id', checkAuth, projectController.updateProject);
 
 // delete a specific project
+
 router.delete('/:id', checkAuth, projectController.deleteProject);
 
 // upload attachments for a specific project

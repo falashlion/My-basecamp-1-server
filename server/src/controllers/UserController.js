@@ -3,15 +3,15 @@ const userModel = require('../models/userModel');
 const { responseHandler } = require('../utils/responseHandler');
 const bcrypt = require('bcrypt');
 exports.getAllUsers = (req, res, next) => {
-    userModel.find().select('_id first_name last_name email is_admin userImage').exec()
+    userModel.find().select('_id firstName lastName email is_admin userImage').exec()
         .then(docs => {
             const response = {
                 count: docs.length,
                 users: docs.map(doc => {
                     return {
                         _id: doc._id,
-                        first_name: doc.first_name,
-                        last_name: doc.last_name,
+                        firstName: doc.firstName,
+                        lastName: doc.lastName,
                         email: doc.email,
                         is_admin: doc.is_admin,
                         userImage: doc.userImage,
@@ -40,8 +40,8 @@ exports.createUser = (req, res, next) => {
                 } else {
                     const data = new userModel({
                         _id: new mongoose.Types.ObjectId(),
-                        first_name: req.body.first_name || null,
-                        last_name: req.body.last_name || null,
+                        firstName: req.body.firstName || null,
+                        lastName: req.body.lastName || null,
                         email: req.body.email,
                         password: hash,
                         userImage: null
@@ -51,12 +51,12 @@ exports.createUser = (req, res, next) => {
                             responseHandler(res, 201, "User created successfully", {
                                 user: {
                                     _id: result._id,
-                                    first_name: result.first_name,
-                                    last_name: result.last_name,
+                                    firstName: result.firstName,
+                                    lastName: result.lastName,
                                     email: result.email,
                                     userImage: result.userImage,
                                     request: {
-                                        method: 'GET',
+                                        method: 'POST',
                                         url: "http://localhost:5000/api/users/" + result._id
                                     }
                                 }
@@ -79,8 +79,8 @@ exports.getUser = (req, res, next) => {
                 responseHandler(res, 200, "User found", { 
                     user: {
                         _id: doc._id,
-                        first_name: doc.first_name,
-                        last_name: doc.last_name,
+                        firstName: doc.firstName,
+                        lastName: doc.lastName,
                         email: doc.email,
                         is_admin: doc.is_admin,
                         userImage: doc.userImage,
@@ -109,13 +109,13 @@ exports.updateUser = (req, res, next) => {
             console.log(doc);
             responseHandler(res, 200, "User updated successfully", { user: {
                 _id: doc._id,
-                first_name: doc.first_name,
-                last_name: doc.last_name,
+                firstName: doc.firstName,
+                lastName: doc.lastName,
                 email: doc.email,
                 is_admin: doc.is_admin,
                 userImage: doc.userImage,
                 request: {
-                    method: 'GET',
+                    method: 'PATCH',
                     url: "http://localhost:5000/api/users/" + doc._id }
          } });
         })

@@ -3,10 +3,13 @@ const projectModel = require('../models/projectModel');
 const { responseHandler } = require('../utils/responseHandler');
 
 exports.getAllProjects = (req, res, next) => {
-    projectModel.find().select('_id name description created_by attachments').populate('created_by',' _id first_name last_name email is_admin').exec().then(docs => {
-            const response = {
-                count: docs.length,
-                project: docs.map(doc => {
+
+    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+    projectModel.find().select('_id name description created_by attachments').populate('created_by',' _id firstName lastName email is_admin')
+    .limit(limit)
+    .exec().then(docs => {
+            
+                docs.map(doc => {
                 return {
                     id:doc._id,
                     name: doc.name,
@@ -18,9 +21,9 @@ exports.getAllProjects = (req, res, next) => {
                         url: "http://localhost:5000/api/projects/" + docs._id
                     }
                 }
-            })
-            }
-                responseHandler(res, 200, "All Projects found successfully", {response });
+                } )
+                responseHandler(res, 200, "All Projects found successfully", {docs });
+                console.log(docs);
         
     }).catch(err => {       
         responseHandler(res, 500, "An error occurred", { error: err });
@@ -32,18 +35,18 @@ exports.createProject = (req, res, next) => {
         _id: new mongoose.Types.ObjectId(),
         name: req.body.name,
         description: req.body.description,
-        created_by: req.body.created_by
+        created_by: req.user._id
     });
     data.save().then(docs => {
         responseHandler(res, 201, "Project created successfully", {
-            Project: {
+            project:{
                 id:docs._id,
                 name: docs.name,
                 description: docs.description,
                 created_by: docs.created_by,
                 attachments: docs.attachments,
                 request: {
-                    method: 'GET',
+                    method: 'POST',
                     url: "http://localhost:5000/api/projects/" + docs._id
                 }
             }
@@ -56,9 +59,9 @@ exports.createProject = (req, res, next) => {
 
 exports.getProjectById = (req, res, next) => {
     const id = req.params.id
-    projectModel.findById({_id: id}).populate('created_by', '_id first_name last_name email is_admin').exec().then(docs => {
+    projectModel.findById({_id: id}).populate('created_by', '_id firstName lastName email is_admin').exec().then(docs => {
         responseHandler(res, 200, "Project found successfully", {
-            Project: {
+            project: {
                 id:docs._id,
                 name: docs.name,
                 description: docs.description,
@@ -81,19 +84,19 @@ exports.updateProject = (req, res, next) => {
     for(const ops of req.body){
         updateOps[ops.propName] = ops.value;
     }
-    projectModel.findByIdAndUpdate({_id: id}, {$set: updateOps}).populate('created_by','_id first_name last_name email is_admin').exec().then(docs => {
+    projectModel.findByIdAndUpdate({ _id: id }, { $set: updateOps }).populate('created_by','_id firstName lastName email is_admin').exec().then(docs => {
         if(!docs){
             responseHandler(res, 404, "No valid entry found for provided ID", {id : id});
         }
-        responseHandler(res, 201, "Project updated successfully", {
-            Project: {
+        responseHandler(res, 200, "Project updated successfully", {
+            project: {
                 id:docs._id,
                 name: docs.name,
                 description: docs.description,
                 created_by: docs.created_by,
                 attachments: docs.attachments,
                 request: {
-                    method: 'GET',
+                    method: 'PATCH',
                     url: "http://localhost:5000/api/projects/" + docs._id
                 }
             }
@@ -105,11 +108,11 @@ exports.updateProject = (req, res, next) => {
 
 exports.deleteProject = (req, res, next) => {
     const id = req.params.id
-    projectModel.remove({_id: id}).exec().then(docs => {
+    projectModel.deleteOne({_id: id}).exec().then(docs => {
         if(docs.deletedCount === 0){
             responseHandler(res, 404, "No valid entry found for provided ID", {id : id});
         }
-        responseHandler(res, 204, "Project updated successfully", {docs});
+        responseHandler(res, 204, "Project updated successfully", {});
     }).catch(err => {       
         responseHandler(res, 500, "An error occurred", { error: err });
     });

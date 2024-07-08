@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 // Define the schema
 const userSchema = new mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,
-  first_name: { type: String, required: false },
-  last_name: { type: String, required: false },
+  firstName: { type: String, required: false },
+  lastName: { type: String, required: false },
   email: { type: String, required: true, match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
   password: { type: String, required: true },
   is_admin: { type: Boolean, default: false },
