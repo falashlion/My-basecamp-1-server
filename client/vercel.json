@@ -1,0 +1,9 @@
+{
+    "rewrites": [
+      {
+        "source": "/api/(.*)",
+        "destination": "https://mybasecampserver1.vercel.app/api/$1"
+      }
+    ]
+  }
+  
